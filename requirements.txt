@@ -1,0 +1,7 @@
+# Dành cho Streamlit Community Cloud. Đặt file này ở thư mục gốc của repo.
+streamlit>=1.40
+google-genai>=1.0
+pillow>=10.0
+numpy>=1.26
+scipy>=1.11
+plotly>=5.20
