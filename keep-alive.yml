@@ -1,0 +1,42 @@
+# TÙY CHỌN: giữ ứng dụng không bị "ngủ" trên Streamlit Community Cloud (ngủ sau 12 giờ không có người truy cập).
+# Cần tạo GitHub Secret tên APP_URL = địa chỉ ứng dụng, ví dụ https://ten-cua-ban.streamlit.app
+name: Keep Streamlit app awake
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # mỗi 6 giờ (giờ UTC)
+  workflow_dispatch: {}
+jobs:
+  visit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cài trình duyệt không giao diện
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+      - name: Mở ứng dụng như một người dùng thật
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          python - <<'PY'
+          import os, re, sys
+          from playwright.sync_api import sync_playwright
+          url = os.environ.get("APP_URL")
+          if not url:
+              sys.exit("Thiếu GitHub Secret APP_URL")
+          with sync_playwright() as p:
+              page = p.chromium.launch().new_page()
+              page.goto(url, wait_until="domcontentloaded", timeout=60000)
+              page.wait_for_timeout(15000)
+              wake = page.get_by_role("button", name=re.compile("get this app back up", re.I))
+              if wake.count():
+                  wake.first.click()
+                  print("Ứng dụng đang ngủ: đã bấm nút đánh thức")
+                  page.wait_for_timeout(90000)
+              else:
+                  print("Ứng dụng đang thức")
+              page.wait_for_timeout(20000)  # giữ kết nối vài giây để được tính là có truy cập
+          PY

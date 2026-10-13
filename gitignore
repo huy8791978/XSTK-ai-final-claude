@@ -1,0 +1,6 @@
+# Không bao giờ đưa khóa bí mật lên GitHub
+.streamlit/secrets.toml
+.env
+__pycache__/
+*.pyc
+streamlit.log
