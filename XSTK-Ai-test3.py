@@ -48,7 +48,7 @@ st.set_page_config(page_title="XSTK AI · Học Xác suất Thống kê", page_i
 # ==========================================
 # --- Cấu hình chỉ chỉnh trong code, không hiển thị trên web. Khóa API chỉ lấy từ Secrets, không bao giờ nằm trong code ---
 MODEL_NAME = "gemini-3.5-flash-lite"
-FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-3.5-flash"]  # tự động thử nếu model chính lỗi
+FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]  # tự động thử nếu model chính lỗi
 MAX_RPM = 12  # tối đa số lượt gọi AI mỗi phút cho TOÀN BỘ người dùng (đặt thấp hơn hạn mức của key)
 PER_USER_RPM = 5  # tối đa lượt gọi AI mỗi phút của MỘT người dùng (để không ai chiếm hết lượt của cả lớp)
 MAX_CHARS = 6000  # độ dài tối đa của đề bài / bài làm
@@ -86,6 +86,11 @@ st.markdown("""
     --ok:#2f7a4f; --ok-soft:#e8f2ec; --warn:#a8741a; --warn-soft:#faf1de; --err:#a7372c; --err-soft:#f8e9e7;
     --shadow:0 1px 2px rgba(20,40,70,.06), 0 10px 28px -14px rgba(20,40,70,.22);
     --shadow-sm:0 1px 2px rgba(20,40,70,.06), 0 4px 12px -8px rgba(20,40,70,.2);
+    --white:#ffffff; --hero:#12274a; --glow-1:#e0e9f5; --glow-2:#e8edf4; --accent-hover:#d8e3f3;
+    --ring:#8fb0e0; --line-strong:#9db3d3; --track:#d9e1ec; --skel:#e6ebf1;
+    --r-sm:12px; --r-md:14px; --r-lg:20px; --r-xl:28px; --r-pill:999px;
+    --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2.5rem;
+    --fs-xs:.8rem; --fs-sm:.9rem; --fs-md:1rem; --fs-lg:1.2rem; --fs-xl:1.55rem;
     --ease:cubic-bezier(.2,.8,.2,1); --hh:88px; --maxw:980px;
 }
 @media (max-width: 640px) { :root { --hh: 72px; } }
@@ -99,8 +104,8 @@ html, body, .stApp, button, textarea, input {
 /* ===== Nền: màu trung tính, hai vệt sáng nhẹ và lớp hạt mịn ===== */
 .stApp {
     min-height: 100vh; min-height: 100dvh;
-    background: radial-gradient(1100px 520px at 6% -8%, #e0e9f5 0%, transparent 60%),
-                radial-gradient(900px 480px at 100% 0%, #e8edf4 0%, transparent 55%), var(--bg);
+    background: radial-gradient(1100px 520px at 6% -8%, var(--glow-1) 0%, transparent 60%),
+                radial-gradient(900px 480px at 100% 0%, var(--glow-2) 0%, transparent 55%), var(--bg);
 }
 .stApp::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .5;
@@ -112,10 +117,10 @@ html, body, .stApp, button, textarea, input {
 
 /* ===== Chữ: thang cỡ, độ đậm và khoảng cách chữ có chủ đích ===== */
 .stApp :is(h1, h2, h3, h4, h5, h6), .stApp [data-testid="stHeading"] * { color: var(--ink) !important; text-wrap: balance; }
-.stApp h3 { font-size: 1.55rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.stApp h3 { font-size: var(--fs-xl); font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
 [class*="st-key-card_"] :is(h1) { font-size: 1.35rem; letter-spacing: -.015em; }
-[class*="st-key-card_"] :is(h2) { font-size: 1.2rem; letter-spacing: -.01em; }
-[class*="st-key-card_"] :is(h3, h4) { font-size: 1.05rem; font-weight: 600; letter-spacing: -.005em; }
+[class*="st-key-card_"] :is(h2) { font-size: var(--fs-lg); letter-spacing: -.01em; }
+[class*="st-key-card_"] :is(h3, h4) { font-size: var(--fs-md); font-weight: 600; letter-spacing: -.005em; }
 .stApp [data-testid="stMarkdownContainer"] :is(p, li, span, strong, em, td, th) { color: var(--ink); }
 .stApp [data-testid="stMarkdownContainer"] :is(p, li) { line-height: 1.65; text-wrap: pretty; }
 .stApp [data-testid="stCaptionContainer"], .stApp [data-testid="stCaptionContainer"] * { color: var(--muted) !important; }
@@ -125,39 +130,39 @@ html, body, .stApp, button, textarea, input {
 /* ===== Thanh đầu trang: một tông xanh đậm, tiêu đề canh theo lề nội dung ===== */
 header[data-testid="stHeader"] {
     top: 12px; left: 12px; right: 12px; margin: 0 auto; width: auto; max-width: var(--maxw); height: 56px;
-    border-radius: 999px; background: rgba(31, 67, 122, .84); border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: var(--r-pill); background: rgba(31, 67, 122, .84); border: 1px solid rgba(255, 255, 255, .16);
     -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
     box-shadow: 0 12px 30px -14px rgba(20, 40, 70, .6);
 }
 @media (max-width: 640px) { header[data-testid="stHeader"] { height: 48px; top: 10px; left: 8px; right: 8px; } }
 header[data-testid="stHeader"]::before {
     content: "__TITLE__"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center;
-    padding: 0 4.5rem; pointer-events: none; color: #fff; line-height: 1.25;
+    padding: 0 4.5rem; pointer-events: none; color: var(--white); line-height: 1.25;
     font-weight: 600; font-size: clamp(15px, 1.9vw, 22px); letter-spacing: -.01em; text-wrap: balance;
 }
-header[data-testid="stHeader"] :is(button, a, svg, span) { color: #fff !important; }
+header[data-testid="stHeader"] :is(button, a, svg, span) { color: var(--white) !important; }
 
 /* ===== Nút bấm: chính (đặc), phụ (nền nhạt), có hover/nhấn/focus/vô hiệu ===== */
 .stApp .stButton > button {
-    min-height: 44px; border-radius: 12px; font-weight: 600; letter-spacing: .005em;
+    min-height: 44px; border-radius: var(--r-sm); font-weight: 600; letter-spacing: .005em;
     transition: transform .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease);
 }
 .stApp :is(button[kind="primary"], [data-testid="stBaseButton-primary"]) {
     background: var(--accent) !important; border: 0 !important; box-shadow: var(--shadow-sm);
 }
-.stApp :is(button[kind="primary"], [data-testid="stBaseButton-primary"]) * { color: #fff !important; }
+.stApp :is(button[kind="primary"], [data-testid="stBaseButton-primary"]) * { color: var(--white) !important; }
 .stApp :is(button[kind="primary"], [data-testid="stBaseButton-primary"]):hover { background: var(--accent-deep) !important; }
 .stApp :is(button[kind="secondary"], [data-testid="stBaseButton-secondary"]) { background: var(--accent-soft) !important; border: 0 !important; }
 .stApp :is(button[kind="secondary"], [data-testid="stBaseButton-secondary"]) * { color: var(--accent-deep) !important; }
-.stApp :is(button[kind="secondary"], [data-testid="stBaseButton-secondary"]):hover { background: #d8e3f3 !important; }
+.stApp :is(button[kind="secondary"], [data-testid="stBaseButton-secondary"]):hover { background: var(--accent-hover) !important; }
 .stApp .stButton > button:hover:not(:disabled) { transform: translateY(-1px); }
 .stApp .stButton > button:active:not(:disabled) { transform: scale(.98); }
 .stApp .stButton > button:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
-.stApp :is(button, [role="tab"], input, textarea):focus-visible { outline: 3px solid #8fb0e0 !important; outline-offset: 2px; }
+.stApp :is(button, [role="tab"], input, textarea):focus-visible { outline: 3px solid var(--ring) !important; outline-offset: 2px; }
 
 /* ===== Ô nhập, chọn, tải file ===== */
 .stApp [data-baseweb="select"] > div, .stApp [data-baseweb="textarea"], .stApp [data-baseweb="base-input"], .stApp [data-baseweb="input"] {
-    background: var(--panel) !important; border: 1px solid var(--line) !important; border-radius: 10px !important;
+    background: var(--panel) !important; border: 1px solid var(--line) !important; border-radius: var(--r-sm) !important;
     transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
 }
 .stApp :is([data-baseweb="select"] > div, [data-baseweb="textarea"], [data-baseweb="base-input"]):focus-within {
@@ -168,9 +173,9 @@ header[data-testid="stHeader"] :is(button, a, svg, span) { color: #fff !importan
 .stApp textarea { font-size: 16px; line-height: 1.55; }
 [data-baseweb="popover"] :is(ul, li, div) { background: var(--panel) !important; color: var(--ink) !important; }
 [data-baseweb="popover"] li:hover, [data-baseweb="popover"] li[aria-selected="true"] { background: var(--accent-soft) !important; }
-[data-testid="stFileUploaderDropzone"] { background: var(--panel) !important; border: 1.5px dashed #9db3d3 !important; border-radius: 16px; }
+[data-testid="stFileUploaderDropzone"] { background: var(--panel) !important; border: 1.5px dashed var(--line-strong) !important; border-radius: var(--r-md); }
 [data-testid="stFileUploaderDropzone"] * { color: var(--ink) !important; }
-[data-testid="stFileUploaderDropzone"] button { background: var(--accent-soft) !important; border: 0 !important; border-radius: 10px; }
+[data-testid="stFileUploaderDropzone"] button { background: var(--accent-soft) !important; border: 0 !important; border-radius: var(--r-sm); }
 [data-testid="stFileUploaderDropzone"] button * { color: var(--accent-deep) !important; }
 
 /* Thanh kéo: số trên nút kéo luôn nằm một dòng (không bị bẻ từng ký tự) */
@@ -181,63 +186,68 @@ header[data-testid="stHeader"] :is(button, a, svg, span) { color: #fff !importan
 }
 
 /* Chọn chế độ: dạng thanh phân đoạn (nếu trình duyệt chưa hỗ trợ :has thì vẫn thấy chấm chọn mặc định) */
-.stApp [data-testid="stRadio"] [role="radiogroup"] { gap: 4px; background: var(--accent-soft); padding: 4px; border-radius: 14px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
-.stApp [data-testid="stRadio"] [data-baseweb="radio"] { padding: 6px 14px; border-radius: 10px; margin: 0; transition: background-color .2s var(--ease), box-shadow .2s var(--ease); }
+.stApp [data-testid="stRadio"] [role="radiogroup"] { gap: 4px; background: var(--accent-soft); padding: 4px; border-radius: var(--r-md); width: fit-content; max-width: 100%; flex-wrap: wrap; }
+.stApp [data-testid="stRadio"] [data-baseweb="radio"] { padding: 6px 14px; border-radius: var(--r-sm); margin: 0; transition: background-color .2s var(--ease), box-shadow .2s var(--ease); }
 .stApp [data-testid="stRadio"] [data-baseweb="radio"]:has(input:checked) { background: var(--panel); box-shadow: var(--shadow-sm); }
 
-/* ===== Tab: gạch chân tông nhấn, cuộn ngang trên điện thoại ===== */
-.stTabs [data-baseweb="tab-list"] { gap: 2px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: thin; }
-.stTabs [data-baseweb="tab"] { padding: 10px 16px; border-radius: 10px 10px 0 0; white-space: nowrap; transition: background-color .2s var(--ease); }
-.stTabs [data-baseweb="tab"]:hover { background: rgba(44, 90, 160, .06); }
-.stTabs [data-baseweb="tab"] * { color: var(--muted) !important; font-weight: 500; }
+/* ===== Tab cấp 1: thanh phân đoạn (cùng ngôn ngữ với ô chọn chế độ); tab con: gạch chân ===== */
+.stTabs [data-baseweb="tab-list"] { gap: var(--s1); padding: var(--s1); border-radius: var(--r-md); background: var(--accent-soft); border-bottom: 0; overflow-x: auto; scrollbar-width: thin; }
+.stTabs [data-baseweb="tab"] { min-height: 44px; padding: var(--s2) var(--s4); border-radius: var(--r-sm); white-space: nowrap; transition: background-color .2s var(--ease), box-shadow .2s var(--ease); }
+.stTabs [data-baseweb="tab"]:hover { background: rgba(255, 255, 255, .55); }
+.stTabs [data-baseweb="tab"] * { color: var(--muted) !important; font-weight: 500; font-size: var(--fs-md); }
+.stTabs [aria-selected="true"] { background: var(--white) !important; box-shadow: var(--shadow-sm); }
 .stTabs [aria-selected="true"] * { color: var(--accent-deep) !important; font-weight: 600; }
-.stTabs [data-baseweb="tab-highlight"] { background: var(--accent) !important; height: 2px; }
-@media (max-width: 640px) { .stTabs [data-baseweb="tab"] { padding: 8px 10px; } .stTabs [data-baseweb="tab"] * { font-size: .88rem; } }
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none; }
+.stTabs .stTabs [data-baseweb="tab-list"] { padding: 0; background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); }
+.stTabs .stTabs [data-baseweb="tab"] { min-height: 42px; border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.stTabs .stTabs [data-baseweb="tab"] * { font-size: var(--fs-sm); }
+.stTabs .stTabs [aria-selected="true"] { background: transparent !important; box-shadow: inset 0 -2px 0 var(--accent); }
+@media (max-width: 640px) { .stTabs [data-baseweb="tab"] { padding: var(--s2) var(--s3); } .stTabs [data-baseweb="tab"] * { font-size: var(--fs-sm); } }
 
 /* ===== Thẻ nội dung: bỏ viền, chỉ dùng nền trắng và bóng đổ cùng tông; bán kính khác nhau theo cấp ===== */
-[class*="st-key-card_"] { background: var(--panel); border: 0; border-radius: 18px; padding: 1.3rem 1.6rem 1.4rem; box-shadow: var(--shadow); overflow-x: auto; }
+[class*="st-key-card_"] { background: var(--panel); border: 0; border-radius: var(--r-lg); padding: 1.3rem 1.6rem 1.4rem; box-shadow: var(--shadow); overflow-x: auto; }
 .st-key-card_topic { background: transparent; box-shadow: none; border-radius: 0; padding: 0 0 .9rem; border-bottom: 1px solid var(--line); overflow: visible; }
-@media (max-width: 640px) { [class*="st-key-card_"] { padding: 1rem 1.1rem 1.1rem; border-radius: 16px; } }
+@media (max-width: 640px) { [class*="st-key-card_"] { padding: 1rem 1.1rem 1.1rem; border-radius: var(--r-md); } }
 .stApp table { border-collapse: collapse; }
 .stApp :is(th, td) { border: 0 !important; border-bottom: 1px solid var(--line) !important; padding: .45rem .75rem !important; }
 .stApp th { background: var(--accent-soft) !important; font-weight: 600; }
 .stApp .katex-display { overflow-x: auto; overflow-y: hidden; }
 .stApp :is(.katex, [data-testid="stLatex"]) { color: var(--ink); }
-.stApp [data-testid="stMetric"] { background: var(--panel); border-radius: 14px; padding: .7rem 1rem; box-shadow: var(--shadow-sm); }
+.stApp [data-testid="stMetric"] { background: var(--panel); border-radius: var(--r-md); padding: .7rem 1rem; box-shadow: var(--shadow-sm); }
 .stApp [data-testid="stMetric"] * { color: var(--ink) !important; }
 
 /* ===== Thông báo, trạng thái trống, đang tải (khung xương), tiến độ ===== */
-.note { border-radius: 12px; padding: .75rem 1rem; margin: .5rem 0; line-height: 1.5; border-left: 4px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
+.note { border-radius: var(--r-sm); padding: .75rem 1rem; margin: .5rem 0; line-height: 1.5; border-left: 4px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
 .note.ok { border-color: var(--ok); background: var(--ok-soft); }
 .note.warn { border-color: var(--warn); background: var(--warn-soft); }
 .note.err { border-color: var(--err); background: var(--err-soft); }
-.empty { border-radius: 16px; padding: 1.1rem 1.3rem; color: var(--muted); background: rgba(255, 255, 255, .55); box-shadow: inset 0 0 0 1px var(--line); }
-.skel { background: var(--panel); border-radius: 18px; padding: 1.3rem 1.6rem; box-shadow: var(--shadow); }
-.skel-msg { color: var(--muted); font-size: .92rem; margin-bottom: .9rem; }
-.sk { position: relative; overflow: hidden; height: 13px; border-radius: 7px; background: #e6ebf1; margin-bottom: .65rem; }
+.empty { border-radius: var(--r-md); padding: 1.1rem 1.3rem; color: var(--muted); background: rgba(255, 255, 255, .55); box-shadow: inset 0 0 0 1px var(--line); }
+.skel { background: var(--panel); border-radius: var(--r-lg); padding: 1.3rem 1.6rem; box-shadow: var(--shadow); }
+.skel-msg { color: var(--muted); font-size: var(--fs-sm); margin-bottom: .9rem; }
+.sk { position: relative; overflow: hidden; height: 13px; border-radius: var(--r-sm); background: var(--skel); margin-bottom: .65rem; }
 .sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .75), transparent); animation: shimmer 1.4s infinite; }
 .w1 { width: 94%; } .w2 { width: 80%; } .w3 { width: 88%; } .w4 { width: 52%; }
 @keyframes shimmer { to { transform: translateX(100%); } }
-.pcap { font-size: .88rem; font-weight: 500; color: var(--muted); margin: 1rem 0 .45rem; }
-.pbar { height: 8px; border-radius: 99px; background: #d9e1ec; overflow: hidden; margin-bottom: 1.5rem; }
-.pbar > div { width: 100%; height: 100%; border-radius: 99px; background: var(--accent); transform-origin: left; transition: transform .5s var(--ease); }
-.sub { color: var(--muted); margin: 0 0 1.1rem; font-size: .98rem; text-wrap: pretty; }
-.foot { text-align: center; color: #fff; background: var(--accent-deep); border-radius: 20px; padding: 1.1rem 1.4rem; font-size: .84rem; margin: 4rem 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 640px) { .foot { white-space: normal; font-size: .78rem; padding: 1rem; } }
-.stApp [data-baseweb="radio"] > div:first-child { background: #fff !important; border-color: #9db3d3 !important; }
+.pcap { font-size: var(--fs-sm); font-weight: 500; color: var(--muted); margin: 1rem 0 .45rem; }
+.pbar { height: 8px; border-radius: var(--r-pill); background: var(--track); overflow: hidden; margin-bottom: 1.5rem; }
+.pbar > div { width: 100%; height: 100%; border-radius: var(--r-pill); background: var(--accent); transform-origin: left; transition: transform .5s var(--ease); }
+.sub { color: var(--muted); margin: 0 0 1.1rem; font-size: var(--fs-md); text-wrap: pretty; }
+.foot { text-align: center; color: var(--white); background: var(--accent-deep); border-radius: var(--r-lg); padding: 1.1rem 1.4rem; font-size: var(--fs-xs); margin: 4rem 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) { .foot { white-space: normal; font-size: var(--fs-xs); padding: 1rem; } }
+.stApp [data-baseweb="radio"] > div:first-child { background: var(--white) !important; border-color: var(--line-strong) !important; }
 .stApp [data-baseweb="radio"]:has(input:checked) > div:first-child { border-color: var(--accent) !important; }
 
 /* ===== Hero: căn giữa, nền tối có vệt sáng và hạt, tiêu đề tối đa 3 dòng ===== */
-.hero { position: relative; overflow: hidden; text-align: center; border-radius: 28px; margin: 0 0 2.2rem;
+.hero { position: relative; overflow: hidden; text-align: center; border-radius: var(--r-xl); margin: 0 0 2.2rem;
     padding: clamp(1.8rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem); box-shadow: var(--shadow);
     background: radial-gradient(760px 300px at 50% 130%, rgba(92, 140, 220, .55), transparent 70%),
-                radial-gradient(520px 260px at 8% -30%, rgba(80, 120, 190, .38), transparent 70%), #12274a; }
+                radial-gradient(520px 260px at 8% -30%, rgba(80, 120, 190, .38), transparent 70%), var(--hero); }
 .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .45; background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-.stApp .hero .hero-h { position: relative; z-index: 1; color: #fff; font-weight: 600; font-size: clamp(1.7rem, 3.6vw, 2.9rem);
+.stApp .hero .hero-h { position: relative; z-index: 1; color: var(--white); font-weight: 600; font-size: clamp(1.7rem, 3.6vw, 2.9rem);
     letter-spacing: -.03em; line-height: 1.14; text-wrap: balance; margin: 0 auto; animation: rise-in .7s var(--ease) both; }
 .stApp .hero .hero-p { position: relative; z-index: 1; color: rgba(255, 255, 255, .8); margin: .9rem auto 0; max-width: 60ch;
     font-size: clamp(.95rem, 1.5vw, 1.1rem); line-height: 1.55; text-wrap: pretty; animation: rise-in .7s .12s var(--ease) both; }
-.pill-img { display: inline-block; width: 2.1em; height: .74em; border-radius: 999px; vertical-align: -.06em; margin: 0 .1em;
+.pill-img { display: inline-block; width: 2.1em; height: .74em; border-radius: var(--r-pill); vertical-align: -.06em; margin: 0 .1em;
     background: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234a7dc4'/%3E%3Cstop offset='1' stop-color='%238fb4e6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='40' fill='url(%23g)'/%3E%3Cpath d='M0 38 C28 38 38 6 60 6 C82 6 92 38 120 38 Z' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M0 38 C28 38 38 6 60 6 C82 6 92 38 120 38' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E") center / cover; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35); }
 @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
@@ -247,13 +257,13 @@ header[data-testid="stHeader"] :is(button, a, svg, span) { color: #fff !importan
 .bc-a { grid-column: span 2; grid-row: span 2; } .bc-b { grid-column: span 2; } .bc-c, .bc-d { grid-column: span 1; }
 @media (max-width: 640px) { .bento { grid-template-columns: repeat(2, 1fr); } .bc-a { grid-row: span 1; } }
 .bento-card { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: .3rem;
-    border-radius: 20px; padding: 1.1rem 1.2rem; background: var(--panel); box-shadow: var(--shadow-sm);
+    border-radius: var(--r-lg); padding: 1.1rem 1.2rem; background: var(--panel); box-shadow: var(--shadow-sm);
     transition: transform .5s var(--ease), box-shadow .5s var(--ease); }
 .bento-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .bc-a { background: var(--accent-deep); justify-content: flex-start; } .bc-c { background: var(--accent-soft); }
 .bento-card .bt { position: relative; z-index: 1; font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em; color: var(--ink); }
 .bento-card .bd { position: relative; z-index: 1; font-size: .9rem; line-height: 1.5; color: var(--muted); }
-.bc-a .bt { color: #fff; font-size: 1.25rem; } .bc-a .bd { color: rgba(255, 255, 255, .8); }
+.bc-a .bt { color: var(--white); font-size: 1.25rem; } .bc-a .bd { color: rgba(255, 255, 255, .8); }
 .motif { position: absolute; left: -8%; right: -8%; bottom: -12%; height: 68%; opacity: .6; transition: transform .7s var(--ease);
     background: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80'%3E%3Cpath d='M0 78 C50 78 70 6 100 6 C130 6 150 78 200 78 Z' fill='rgba(255,255,255,.12)'/%3E%3Cpath d='M0 78 C50 78 70 6 100 6 C130 6 150 78 200 78' fill='none' stroke='rgba(255,255,255,.7)' stroke-width='2'/%3E%3C/svg%3E") center bottom / contain no-repeat; }
 .bc-a:hover .motif { transform: scale(1.06); }
@@ -271,15 +281,24 @@ header[data-testid="stHeader"] :is(button, a, svg, span) { color: #fff !importan
 }
 /* ===== Hồ sơ, bảng ký hiệu toán, hộp mở rộng, nút tải ===== */
 .qlbl { color: var(--muted); font-size: .95rem; margin: 0 0 .7rem; }
-.stApp [data-testid="stExpander"] details { border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .6); }
+.stApp [data-testid="stExpander"] details { border: 1px solid var(--line); border-radius: var(--r-md); background: rgba(255, 255, 255, .6); }
 .stApp [data-testid="stExpander"] summary, .stApp [data-testid="stExpander"] summary * { color: var(--ink) !important; }
-.stApp [data-testid="stDownloadButton"] button { min-height: 44px; border-radius: 12px; font-weight: 600; background: var(--accent-soft) !important; border: 0 !important; }
+.stApp [data-testid="stDownloadButton"] button { min-height: 44px; border-radius: var(--r-sm); font-weight: 600; background: var(--accent-soft) !important; border: 0 !important; }
 .stApp [data-testid="stDownloadButton"] button * { color: var(--accent-deep) !important; }
-.stApp [data-testid^="stBaseButton-pills"] { background: var(--panel) !important; border: 1px solid var(--line) !important; border-radius: 999px; min-height: 38px; }
+.stApp [data-testid^="stBaseButton-pills"] { background: var(--panel) !important; border: 1px solid var(--line) !important; border-radius: var(--r-pill); min-height: 38px; }
 .stApp [data-testid^="stBaseButton-pills"] * { color: var(--ink) !important; }
 .stApp [data-testid="stBaseButton-pillsActive"] { background: var(--accent-soft) !important; border-color: var(--accent) !important; }
 /* Kính mờ chỉ là mô phỏng web (backdrop-filter); người dùng giảm độ trong suốt thì dùng nền đặc */
 @media (prefers-reduced-transparency: reduce) { header[data-testid="stHeader"] { background: var(--accent-deep); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+/* ===== Bảng tạo bài và đáp án trắc nghiệm ===== */
+[class*="st-key-card_"][class*="_maker"] .stButton > button { min-height: 52px; font-size: var(--fs-md); }
+.stApp [class*="st-key-mcq_"] [data-testid="stRadio"] [role="radiogroup"] { flex-direction: column; align-items: stretch; gap: var(--s2); width: 100%; padding: 0; background: transparent; }
+.stApp [class*="st-key-mcq_"] [data-testid="stRadio"] [data-baseweb="radio"] { width: 100%; min-height: 52px; align-items: center; padding: var(--s3) var(--s4); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: none; }
+.stApp [class*="st-key-mcq_"] [data-testid="stRadio"] [data-baseweb="radio"]:hover { border-color: var(--line-strong); }
+.stApp [class*="st-key-mcq_"] [data-testid="stRadio"] [data-baseweb="radio"]:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.stApp [data-baseweb="radio"]:has(input:focus-visible) { outline: 3px solid var(--ring); outline-offset: 2px; }
+/* Chế độ tương phản cao của hệ điều hành: trạng thái đang chọn phải thấy được bằng viền */
+@media (forced-colors: active) { .stApp [data-baseweb="radio"]:has(input:checked), .stTabs [aria-selected="true"] { outline: 2px solid Highlight; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 </style>
 """.replace("__TITLE__", TITLE), unsafe_allow_html=True)
@@ -854,7 +873,7 @@ def profile_panel():
         st.markdown(f"Tên: **{md_escape(p['name'])}**")
         c1, c2, c3 = st.columns(3)
         c1.metric("Lượt làm bài", len(events))
-        c2.metric("Bài vận dụng đúng", f"{sum(e['ok'] for e in graded)}/{len(graded)}")
+        c2.metric("Bài chấm đúng", f"{sum(e['ok'] for e in graded)}/{len(graded)}")
         c3.metric("Chủ đề đã học", len({e["topic"] for e in events}))
         if not events:
             note("info", "Chưa có bài làm nào được chấm. Hãy làm vài bài ở Củng cố, Vận dụng hoặc Giải toán rồi quay lại.")
@@ -902,33 +921,132 @@ def reflect(key, area, btn, build, kind=None, ctx=None):
     show(key)
 
 
-def make_question(p, makers):
-    """Hàng nút tạo đề; trả về đề hiện tại (nếu có)."""
-    new = None
-    for i, (col, (label, prompt)) in enumerate(zip(st.columns(len(makers)), makers)):
-        if ai_button(label, f"{p}_mk{i}", col=col, full=True) and ready():
-            new = prompt
+# ==========================================
+# TRẮC NGHIỆM VÀ TỰ LUẬN
+# ==========================================
+LETTERS = "ABCD"
+MCQ_SCHEMA = ('{"q": "đề bài", "o": ["đáp án A", "đáp án B", "đáp án C", "đáp án D"], "a": "A", '
+              '"e": "giải thích ngắn: vì sao đáp án đúng và vì sao ba đáp án còn lại sai"}')
+
+
+def mcq_prompt(subject, desc):
+    return (f"Tạo 1 câu hỏi TRẮC NGHIỆM 4 đáp án về '{subject}', {desc}. Chỉ trả về MỘT khối JSON hợp lệ, không giải thích, "
+            f"không dùng ```, theo mẫu: {MCQ_SCHEMA}. Chỉ MỘT đáp án đúng; ba đáp án sai phải hợp lý (là lỗi sinh viên hay mắc) "
+            "và không trùng nhau. Hãy tự kiểm tra lại đáp án đúng trước khi trả lời. Dùng ký hiệu Unicode (μ, σ, ², ≤, √) "
+            "thay cho LaTeX; nếu bắt buộc dùng LaTeX thì viết giữa $...$ và nhân đôi mọi dấu gạch chéo ngược.")
+
+
+def essay_prompt(subject, desc):
+    return f"Tạo 1 bài TỰ LUẬN về '{subject}', {desc}. Chỉ đưa đề bài, không đưa đáp án."
+
+
+def qspec(subject, items):
+    """{tên dạng: mô tả} -> {tên dạng: {"tn": câu lệnh trắc nghiệm, "tl": câu lệnh tự luận}}."""
+    return {name: {"tn": mcq_prompt(subject, desc), "tl": essay_prompt(subject, desc)} for name, desc in items.items()}
+
+
+def parse_mcq(text):
+    """JSON trắc nghiệm do AI trả về -> {q, o (4 đáp án), a (0-3), e}. None nếu sai cấu trúc."""
+    m = re.search(r"\{.*\}", text or "", re.S)
+    if not m:
+        return None
+    try:
+        data = json.loads(m.group(0))
+    except ValueError:
+        try:  # AI hay viết LaTeX với một dấu gạch chéo ngược, làm JSON không hợp lệ: nhân đôi rồi thử lại
+            data = json.loads(re.sub(r'\\(?!["\\/bfnrtu])', r"\\\\", m.group(0)))
+        except ValueError:
+            return None
+    if not isinstance(data, dict) or not isinstance(data.get("o"), list) or len(data["o"]) != 4:
+        return None
+    ans = str(data.get("a", "")).strip().upper()[:1]
+    q = str(data.get("q", "")).strip()
+    opts = [re.sub(r"^[A-Da-d][.)]\s+", "", str(x).strip()) for x in data["o"]]  # bỏ tiền tố "A. " nếu AI tự thêm
+    if not q or ans not in LETTERS or not all(opts) or len(set(opts)) < 4:
+        return None
+    return {"q": q[:1500], "o": [x[:400] for x in opts], "a": LETTERS.index(ans), "e": str(data.get("e", "")).strip()[:1500]}
+
+
+def keyed(name):
+    """Khung có tên lớp CSS riêng (Streamlit cũ chưa hỗ trợ key thì dùng khung thường)."""
+    try:
+        return st.container(key=name)
+    except TypeError:
+        return st.container()
+
+
+def mcq_block(p, raw, section):
+    """Trắc nghiệm: chọn một đáp án, app tự chấm ngay (không tốn lượt gọi AI). Trả về kết quả nếu đã nộp."""
+    mcq = parse_mcq(raw)
+    if mcq is None:
+        note("warn", "AI trả về câu hỏi chưa đúng định dạng. Hãy bấm tạo lại.")
+        return None
+    n = st.session_state.get(f"n_{p}", 0)
+    res = st.session_state.get(f"res_{p}")
+    res = res if res and res["n"] == n else None
+    with card(f"{p}_qbox"):
+        st.markdown("**Câu hỏi trắc nghiệm**")
+        st.markdown(mcq["q"])
+    with keyed(f"mcq_{p}"):
+        choice = st.radio("Chọn một đáp án", list(range(4)), index=None, key=f"{p}_o{n}", disabled=res is not None,
+                          format_func=lambda i: f"{LETTERS[i]}. {mcq['o'][i]}")
+    if res is None and st.button("Nộp bài", type="primary", key=f"{p}_tn_sub"):
+        if choice is None:
+            note("warn", "Hãy chọn một đáp án trước khi nộp.")
+        else:
+            ok = choice == mcq["a"]
+            res = st.session_state[f"res_{p}"] = {"n": n, "choice": choice, "ok": ok}
+            right = f"{LETTERS[mcq['a']]}. {mcq['o'][mcq['a']]}"
+            log_event(f"Trắc nghiệm · {section}", mcq["q"], f"{LETTERS[choice]}. {mcq['o'][choice]}",
+                      f"Đáp án đúng: {right}. {mcq['e']}", ok)
+    if res:
+        note("ok" if res["ok"] else "err", "Chính xác." if res["ok"] else f"Chưa đúng. Đáp án đúng là {LETTERS[mcq['a']]}.")
+        if mcq["e"]:
+            with card(f"{p}_exp"):
+                st.markdown("**Giải thích**")
+                st.markdown(mcq["e"])
+    return res
+
+
+def tl_card(p, q):
+    with card(f"{p}_qbox"):
+        st.markdown("**Bài tự luận**")
+        st.markdown(q)
+
+
+def make_question(p, spec, label="Dạng bài"):
+    """Bảng tạo bài: chọn dạng hoặc mức độ, rồi bấm tạo bài trắc nghiệm hoặc tự luận. Trả về (đề hiện tại, loại)."""
+    names, new = list(spec), None
+    with card(f"{p}_maker"):
+        name = st.radio(label, names, horizontal=True, key=f"dang_{p}") if len(names) > 1 else names[0]
+        active = st.session_state.get(f"k_{p}")
+        for col, kind, text, hint in zip(st.columns(2), ("tn", "tl"), ("Tạo bài trắc nghiệm", "Tạo bài tự luận"),
+                                         ("4 đáp án, chấm điểm ngay", "viết lời giải, AI chấm điểm")):
+            if ai_button(text, f"{p}_mk_{kind}", col=col, type="primary" if active == kind else "secondary", full=True) and ready():
+                new = (kind, spec[name][kind])
+            col.caption(hint)
     if new:
-        gen(new, f"{p}_q", fresh=True)
+        gen(new[1], f"{p}_q", fresh=True)
         if not st.session_state.get(f"err:{p}_q"):  # chỉ làm mới ô trả lời khi đã có đề mới
             for k in ("fb", "hint", "sol"):
                 st.session_state.pop(f"c:{p}_{k}", None)
+            st.session_state.pop(f"res_{p}", None)
             st.session_state[f"n_{p}"] = st.session_state.get(f"n_{p}", 0) + 1
+            st.session_state[f"k_{p}"] = new[0]
     if st.session_state.get(f"err:{p}_q"):
         note("err", st.session_state[f"err:{p}_q"])
-    q = st.session_state.get(f"c:{p}_q")
-    if q:
-        with card(f"{p}_qbox"):
-            st.markdown("**Đề bài**")
-            st.markdown(q)
-    return q
+    return st.session_state.get(f"c:{p}_q"), st.session_state.get(f"k_{p}")
 
 
-def practice(p, makers):
-    """Củng cố: tạo đề -> tự giải -> gợi ý chiến lược -> lời giải; nộp bài để chấm."""
-    q = make_question(p, makers)
+def practice(p, spec, label="Dạng bài"):
+    """Củng cố. Trắc nghiệm: chọn đáp án, chấm ngay. Tự luận: viết bài, có gợi ý chiến lược và lời giải."""
+    q, kind = make_question(p, spec, label)
     if not q:
         return
+    if kind == "tn":
+        mcq_block(p, q, "Củng cố")
+        return
+    tl_card(p, q)
     ans = math_input("Câu trả lời của bạn", f"{p}_a{st.session_state.get(f'n_{p}', 0)}")
     b1, b2, b3 = st.columns(3)
     if ai_button("Nộp bài", f"{p}_sub", col=b1, type="primary", full=True):
@@ -950,21 +1068,30 @@ def practice(p, makers):
         show(f"{p}_{k}")
 
 
-def apply(p, makers):
-    """Vận dụng: làm đúng 3 bài để hoàn thành."""
+def apply(p, spec, label="Mức độ"):
+    """Vận dụng: làm đúng 3 bài (trắc nghiệm hoặc tự luận) để hoàn thành."""
     done = st.session_state.get(f"d_{p}", 0)
     bar(done, 3, "Đã làm đúng")
     if done >= 3:
-        st.balloons()
+        if not st.session_state.get(f"cel_{p}"):
+            st.balloons()  # chỉ chúc mừng một lần
+            st.session_state[f"cel_{p}"] = True
         note("ok", "Bạn đã hoàn thành 3 bài vận dụng.")
         if st.button("Làm lại từ đầu", key=f"{p}_reset"):
             st.session_state[f"d_{p}"] = 0
-            st.session_state.pop(f"c:{p}_q", None)
-            st.session_state.pop(f"c:{p}_fb", None)
+            for k in (f"cel_{p}", f"res_{p}", f"c:{p}_q", f"c:{p}_fb"):
+                st.session_state.pop(k, None)
             rerun()
         return
-    q = make_question(p, makers)
-    if q:
+    q, kind = make_question(p, spec, label)
+    if q and kind == "tn":
+        res = mcq_block(p, q, "Vận dụng")
+        if res and res["ok"] and not res.get("counted"):
+            res["counted"] = True  # mỗi câu chỉ được tính một lần
+            st.session_state[f"d_{p}"] = done + 1
+            rerun()
+    elif q:
+        tl_card(p, q)
         ans = math_input("Trình bày các bước giải và đáp án", f"{p}_a{st.session_state.get(f'n_{p}', 0)}")
         if ai_button("Chấm điểm", f"{p}_grade", type="primary"):
             if ans.strip():
@@ -1064,20 +1191,18 @@ if mode == MODES[0]:
     with tabs[2]:
         st.subheader("Củng cố")
         st.write("Nhận diện khái niệm trong trường hợp đơn giản và thể hiện nó trong ngữ cảnh khác, trong mối liên hệ với khái niệm khác.")
-        practice("c3", [
-            ("Nhận diện khái niệm", f"Tạo 1 câu hỏi trắc nghiệm hoặc tự luận CỰC KỲ CƠ BẢN để sinh viên nhận diện khái niệm '{topic}' trong "
-                                    f"một tình huống đơn giản quen thuộc. Chỉ đưa đề bài."),
-            ("Bài tính toán dễ", f"Tạo 1 bài tập tính toán mức DỄ về '{topic}'. Chỉ đưa đề bài, không đưa đáp án."),
-            ("Liên hệ khái niệm khác", f"Tạo 1 câu hỏi yêu cầu sinh viên thể hiện khái niệm '{topic}' trong một ngữ cảnh khác và nêu mối "
-                                       f"liên hệ logic với một khái niệm liên quan (so sánh, phân biệt hoặc kết hợp). Chỉ đưa đề bài."),
-        ])
+        practice("c3", qspec(topic, {
+            "Nhận diện khái niệm": "CỰC KỲ CƠ BẢN, giúp sinh viên nhận diện khái niệm trong một tình huống đơn giản quen thuộc",
+            "Tính toán đơn giản": "mức DỄ, có tính toán",
+            "Liên hệ khái niệm khác": "yêu cầu thể hiện khái niệm trong một ngữ cảnh khác và nêu mối liên hệ logic với một khái niệm liên quan (so sánh, phân biệt hoặc kết hợp)",
+        }), "Dạng bài")
     with tabs[3]:
         st.subheader("Vận dụng")
         st.write("Vận dụng khái niệm trong tình huống phức hợp và vấn đề thực tiễn: làm đúng 3 bài để hoàn thành.")
-        apply("c4", [
-            ("Bài trung bình - khá", f"Tạo 1 bài toán tính toán mức TRUNG BÌNH về '{topic}', áp dụng trong nghiệp vụ tài chính ngân hàng. Chỉ đưa đề bài."),
-            ("Bài thực tế - khó", f"Tạo 1 bài toán mức KHÓ, đòi hỏi tư duy tổng hợp dữ liệu kinh tế vĩ mô về '{topic}'. Chỉ đưa đề bài."),
-        ])
+        apply("c4", qspec(topic, {
+            "Trung bình - khá": "mức TRUNG BÌNH, áp dụng trong nghiệp vụ tài chính ngân hàng",
+            "Khó": "mức KHÓ, đòi hỏi tư duy tổng hợp dữ liệu kinh tế vĩ mô",
+        }), "Mức độ")
 
 # ==========================================
 # QUY TRÌNH HỌC ĐỊNH LÍ: Trải nghiệm → Hình thành định lí → Củng cố → Vận dụng
@@ -1117,18 +1242,17 @@ elif mode == MODES[1]:
     with tabs[2]:
         st.subheader("Củng cố")
         st.write("Vận dụng định lí trong các trường hợp đơn giản, đặc trưng.")
-        practice("t3", [
-            ("Nhận diện giả thiết - kết luận", f"Tạo 1 câu hỏi CƠ BẢN yêu cầu sinh viên chỉ ra giả thiết và kết luận của '{topic}' trong một "
-                                               f"tình huống cụ thể. Chỉ đưa đề bài."),
-            ("Bài áp dụng trực tiếp (dễ)", f"Tạo 1 bài tập tính toán mức DỄ áp dụng trực tiếp '{topic}'. Chỉ đưa đề bài, không đưa đáp án."),
-        ])
+        practice("t3", qspec(topic, {
+            "Nhận diện giả thiết - kết luận": "CƠ BẢN, yêu cầu sinh viên chỉ ra giả thiết và kết luận của định lí trong một tình huống cụ thể",
+            "Áp dụng trực tiếp": "mức DỄ, áp dụng trực tiếp định lí",
+        }), "Dạng bài")
     with tabs[3]:
         st.subheader("Vận dụng")
         st.write("Dùng định lí giải quyết vấn đề toán học hoặc thực tiễn: làm đúng 3 bài để hoàn thành.")
-        apply("t4", [
-            ("Bài toán trong toán học", f"Tạo 1 bài toán mức TRUNG BÌNH đòi hỏi vận dụng '{topic}' để giải quyết một vấn đề toán học. Chỉ đưa đề bài."),
-            ("Bài toán thực tiễn", f"Tạo 1 bài toán mức KHÓ vận dụng '{topic}' vào tình huống tài chính - ngân hàng thực tế. Chỉ đưa đề bài."),
-        ])
+        apply("t4", qspec(topic, {
+            "Trong toán học": "mức TRUNG BÌNH, vận dụng định lí để giải quyết một vấn đề toán học",
+            "Thực tiễn": "mức KHÓ, vận dụng định lí vào tình huống tài chính - ngân hàng thực tế",
+        }), "Mức độ")
 
 # ==========================================
 # QUY TRÌNH GIẢI TOÁN: Tìm hiểu đề → Xây dựng chương trình giải → Trình bày lời giải → Kiểm tra, nghiên cứu lời giải
