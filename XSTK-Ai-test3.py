@@ -10,7 +10,6 @@ import json
 import os
 import random
 import re
-import textwrap
 import threading
 import time
 import datetime as dt
@@ -219,7 +218,7 @@ SYS_ORAL_GRADE = BASE + (
 SYS_MAP = BASE + (
     "Tạo bản đồ tư duy cho một chủ đề XSTK. Gốc là tên chủ đề. 5-6 nhánh cấp 1 (ví dụ: Khái niệm; Công thức và tính chất; "
     "Dạng bài và phương pháp; Sai lầm thường gặp; Ví dụ và ứng dụng; Liên hệ chủ đề khác), mỗi nhánh 2-4 nút con, "
-    "có thể thêm cấp 3. Tên nút tối đa 8 từ, văn bản thuần, không LaTeX, không dấu nháy." + JSON_RULE +
+    "có thể thêm cấp 3. Viết tiếng Việt CÓ ĐẦY ĐỦ DẤU. Tên nút tối đa 8 từ, văn bản thuần, không LaTeX, không dùng dấu nháy kép hay dấu gạch chéo ngược." + JSON_RULE +
     ' Cấu trúc: {"ten":"gốc","con":[{"ten":"...","con":[{"ten":"..."}]}]}'
 )
 SYS_PLAN = BASE + (
@@ -693,11 +692,19 @@ h4{font-size:1.25rem!important;font-weight:600!important}
 .lead{color:var(--muted);font-size:1.05rem;line-height:1.65;max-width:32rem;margin:.2rem 0 0}
 .syms{color:var(--teal);opacity:.55;font-family:'Newsreader',Georgia,serif;font-size:1.05rem;letter-spacing:.5em;margin-top:.9rem}
 div[data-testid="stVerticalBlockBorderWrapper"]{border-radius:16px}
-.stButton>button,.stDownloadButton>button,.stFormSubmitButton>button,div[data-testid="stPopover"]>button,div[data-testid="stPopover"]>div>button{width:100%;min-height:46px;border-radius:12px;font-weight:500;transition:transform .15s ease,border-color .15s ease}
+div[data-testid="stElementContainer"]:has(.stButton),div[data-testid="stElementContainer"]:has(.stDownloadButton),div[data-testid="stElementContainer"]:has(.stPopover),div[data-testid="stElementContainer"]:has([data-testid="stFormSubmitButton"]){width:100%!important}
+.stButton,.stDownloadButton,.stPopover,div[data-testid="stFormSubmitButton"]{width:100%!important}
+.stButton>button,.stDownloadButton>button,.stFormSubmitButton>button,[data-testid="stPopoverButton"]{width:100%!important;min-height:46px;border-radius:12px;font-weight:500;justify-content:center;text-align:center;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.stButton>button[kind="primary"],.stButton>button[data-testid="stBaseButton-primary"],.stFormSubmitButton>button[kind="primaryFormSubmit"],.stFormSubmitButton>button[data-testid="stBaseButton-primaryFormSubmit"]{background:var(--teal)!important;border-color:var(--teal)!important;color:#fff!important}
+.stButton>button[kind="primary"]:hover,.stButton>button[data-testid="stBaseButton-primary"]:hover{background:#0B4947!important;border-color:#0B4947!important}
+.procdesc{min-height:3.9em;margin-top:.45rem;color:var(--muted);font-size:.86rem;line-height:1.55}
 .stButton>button:hover,.stDownloadButton>button:hover{transform:translateY(-1px);border-color:var(--teal)}
 .stButton>button:active{transform:scale(.98)}
-div[data-testid="stButtonGroup"]{flex-wrap:wrap;gap:.35rem}
-div[data-testid="stButtonGroup"] button{min-height:42px;border-radius:10px}
+div[data-testid="stButtonGroup"]{width:100%;flex-wrap:wrap;gap:.35rem}
+div[data-testid="stLayoutWrapper"]:has([data-testid="stPopover"]),div[data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]){width:100%!important}
+div[data-testid="stPopover"]>div,button[data-testid="stPopoverButton"]{width:100%!important}
+div[data-testid="stButtonGroup"] [role="radiogroup"]{width:100%!important;max-width:100%!important;display:flex;flex-wrap:wrap;gap:.35rem}
+div[data-testid="stButtonGroup"] button{flex:1 1 0;min-width:max-content;min-height:44px;border-radius:10px;justify-content:center}
 :focus-visible{outline:2px solid var(--teal)!important;outline-offset:2px}
 .step-head{display:flex;align-items:center;gap:1rem;margin:.4rem 0 1rem}
 .step-head .num{flex:none;width:3rem;height:3rem;border-radius:50%;border:2px solid var(--teal);color:var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Newsreader',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--card)}
@@ -706,7 +713,7 @@ div[data-testid="stButtonGroup"] button{min-height:42px;border-radius:10px}
 .score{display:flex;align-items:baseline;gap:.3rem;font-family:'Newsreader',Georgia,serif;margin:.1rem 0 .5rem}
 .score b{font-size:3.6rem;line-height:1;font-weight:600}.score span{color:var(--muted);font-size:1.2rem}
 .score.teal b{color:var(--teal)}.score.amber b{color:var(--amber)}.score.clay b{color:var(--clay)}
-.foot{margin-top:2.5rem;text-align:center;color:var(--muted);font-size:.85rem}
+.foot{margin-top:2.5rem;padding-top:1.2rem;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:.88rem;line-height:1.6}
 .foot b{color:var(--teal);font-family:'Newsreader',Georgia,serif;letter-spacing:.3em;font-weight:600}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .block-container{animation:rise .45s ease both}
@@ -716,13 +723,13 @@ div[data-testid="stButtonGroup"] button{min-height:42px;border-radius:10px}
 
 PROCS = {
     "solve": ("Quy trình giải toán", ":material/calculate:",
-              "4 bước: tìm hiểu đề, xây dựng chương trình giải, trình bày lời giải, kiểm tra và nghiên cứu lời giải.",
+              "Tìm hiểu đề, xây dựng chương trình giải, trình bày và kiểm tra lời giải.",
               ["1 · Tìm hiểu đề", "2 · Chương trình giải", "3 · Lời giải", "4 · Kiểm tra"]),
     "concept": ("Quy trình học khái niệm", ":material/lightbulb:",
-                "Trải nghiệm, hình thành định nghĩa, củng cố, vận dụng vào thực tiễn.",
+                "Trải nghiệm, hình thành định nghĩa, củng cố và vận dụng khái niệm.",
                 ["1 · Trải nghiệm", "2 · Hình thành", "3 · Củng cố", "4 · Vận dụng"]),
     "theorem": ("Quy trình học định lí", ":material/menu_book:",
-                "Trải nghiệm, hình thành định lí, củng cố, vận dụng giải quyết vấn đề.",
+                "Trải nghiệm, hình thành định lí, củng cố và vận dụng định lí.",
                 ["1 · Trải nghiệm", "2 · Hình thành", "3 · Củng cố", "4 · Vận dụng"]),
 }
 
@@ -1119,41 +1126,253 @@ def oral_panel(proc, topic, step_idx):
             bullets("Gợi ý ôn tập", res.get("goi_y_on_tap"))
 
 
-def to_dot(tree):
-    pal = ["#0F5C5A", "#B4531F", "#4F6D3A", "#8A6A12", "#2F5D8C", "#8A3B4E"]
-    cnt = [0]
-    out = ['digraph G{rankdir=LR;bgcolor="transparent";ranksep=0.5;nodesep=0.18;'
-           'node[shape=box,style="rounded,filled",fontname="Helvetica",fontsize=13,margin="0.16,0.08",penwidth=0];'
-           'edge[penwidth=1.5,arrowhead=none];']
+# ───────────────────────── NHÚNG HTML TƯƠNG TÁC (SƠ ĐỒ TƯ DUY, BÀN PHÍM TOÁN) ─────────────────────────
+def embed(html, height):
+    """st.iframe ở Streamlit mới; components.html ở bản cũ."""
+    if hasattr(st, "iframe"):
+        return st.iframe(html, height=height)
+    import streamlit.components.v1 as components
+    return components.html(html, height=height)
 
-    def lab(s):
-        return "\\n".join(textwrap.wrap(re.sub(r'["\\]', "", str(s)), 22)) or "?"
 
-    def walk(n, parent, color, depth):
-        if cnt[0] >= 70 or not isinstance(n, dict):
-            return
-        cnt[0] += 1
-        me = f"n{cnt[0]}"
-        if depth == 0:
-            out.append(f'{me}[label="{lab(n.get("ten"))}",fillcolor="#1F2A27",fontcolor="white",fontsize=16];')
-        elif depth == 1:
-            out.append(f'{me}[label="{lab(n.get("ten"))}",fillcolor="{color}",fontcolor="white"];')
-        else:
-            out.append(f'{me}[label="{lab(n.get("ten"))}",fillcolor="{color}26",fontcolor="#1F2A27"];')
-        if parent:
-            out.append(f'{parent}->{me}[color="{color}"];')
-        if depth < 3:
-            for j, ch in enumerate(n.get("con") or []):
-                walk(ch, me, pal[j % len(pal)] if depth == 0 else color, depth + 1)
+MINDMAP_HTML = r"""<!doctype html><html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:transparent;color:#1F2A27;font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif}
+#vp{position:relative;height:100%;overflow:hidden;border:1px solid #D9D2C3;border-radius:16px;background:#FBF9F4;cursor:grab;user-select:none;-webkit-user-select:none}
+#vp.drag{cursor:grabbing}
+#stage{position:absolute;left:0;top:0;width:max-content;padding:28px;transform-origin:0 0}
+#links{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.row{display:flex;align-items:center}
+.kids{display:flex;flex-direction:column;gap:10px;margin-left:54px}
+.node{position:relative;z-index:1;max-width:230px;padding:9px 14px;border-radius:12px;font-size:14px;line-height:1.4;font-weight:500;border:1.5px solid transparent}
+.node.has{cursor:pointer}
+.node:focus-visible{outline:2px solid #0F5C5A;outline-offset:2px}
+.d0{background:#1F2A27;color:#fff;font-size:16px;font-weight:600;max-width:240px}
+.d1{color:#fff;font-weight:600}
+.badge{display:inline-block;margin-left:8px;padding:0 7px;border-radius:99px;background:rgba(255,255,255,.28);font-size:12px;line-height:18px}
+.d2 .badge{background:rgba(0,0,0,.1)}
+.tb{position:absolute;right:10px;top:10px;display:flex;gap:6px;z-index:5;flex-wrap:wrap;justify-content:flex-end;max-width:85%}
+.tb button{min-width:40px;height:40px;padding:0 12px;border:1px solid #D9D2C3;border-radius:10px;background:#fff;color:#1F2A27;font:inherit;font-size:13px;cursor:pointer}
+.tb button:hover{border-color:#0F5C5A;color:#0F5C5A}
+.hint{position:absolute;left:14px;right:14px;bottom:10px;font-size:12px;line-height:1.4;color:#5E6B66;pointer-events:none}
+</style></head><body>
+<div id="vp">
+ <div class="tb">
+  <button id="zi" aria-label="Phóng to">+</button><button id="zo" aria-label="Thu nhỏ">&minus;</button>
+  <button id="fit">Vừa khung</button><button id="all">Mở hết</button><button id="less">Thu gọn</button><button id="pan" aria-pressed="false" style="display:none" title="Bật để kéo bản đồ theo mọi hướng bằng một ngón tay">Kéo tự do</button>
+ </div>
+ <div id="stage"><svg id="links"></svg><div id="tree"></div></div>
+ <div class="hint">Chạm vào nhánh để mở hoặc thu gọn. Kéo để di chuyển. Chụm hai ngón hoặc giữ Ctrl và cuộn để phóng to.</div>
+</div>
+<script>
+(function(){
+var DATA=__DATA__;
+var PAL=["#0F5C5A","#B4531F","#4F6D3A","#8A6A12","#2F5D8C","#8A3B4E"];
+var vp=document.getElementById('vp'),stage=document.getElementById('stage'),svg=document.getElementById('links'),tree=document.getElementById('tree');
+var tx=0,ty=0,s=1,nodes=[],n=0,NS='http://www.w3.org/2000/svg';
+function rgba(h,a){var v=parseInt(h.slice(1),16);return 'rgba('+(v>>16&255)+','+(v>>8&255)+','+(v&255)+','+a+')'}
+function build(d,depth,color,parent){
+  if(n>=80||!d||typeof d!=='object')return null;n++;
+  var row=document.createElement('div');row.className='row';
+  var box=document.createElement('div');box.className='node d'+Math.min(depth,2);
+  box.appendChild(document.createTextNode(String(d.ten||'?')));
+  if(depth===1)box.style.background=color;
+  else if(depth>=2){box.style.background=rgba(color,.14);box.style.borderColor=rgba(color,.5)}
+  box._c=color;box._p=parent;box._d=depth;nodes.push(box);row.appendChild(box);
+  var kids=Array.isArray(d.con)?d.con:[];
+  if(kids.length&&depth<3){
+    var ke=document.createElement('div');ke.className='kids';
+    kids.forEach(function(k,i){var r=build(k,depth+1,depth===0?PAL[i%PAL.length]:color,box);if(r)ke.appendChild(r)});
+    if(ke.children.length){
+      row.appendChild(ke);box._k=ke;box.classList.add('has');box.setAttribute('role','button');box.tabIndex=0;box.setAttribute('aria-expanded','true');
+      var b=document.createElement('span');b.className='badge';b.textContent='+'+ke.children.length;b.style.display='none';box.appendChild(b);box._b=b;
+    }
+  }
+  return row;
+}
+function setC(b,c){b._k.style.display=c?'none':'';b._b.style.display=c?'':'none';b.setAttribute('aria-expanded',String(!c))}
+function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')'}
+function links(){
+  svg.innerHTML='';svg.setAttribute('width',stage.offsetWidth);svg.setAttribute('height',stage.offsetHeight);
+  var sr=stage.getBoundingClientRect();
+  nodes.forEach(function(b){
+    if(!b._p||b.offsetParent===null)return;
+    var a=b._p.getBoundingClientRect(),c=b.getBoundingClientRect();
+    var x1=(a.right-sr.left)/s,y1=(a.top+a.height/2-sr.top)/s,x2=(c.left-sr.left)/s,y2=(c.top+c.height/2-sr.top)/s,dx=(x2-x1)/2;
+    var p=document.createElementNS(NS,'path');
+    p.setAttribute('d','M'+x1+' '+y1+' C'+(x1+dx)+' '+y1+' '+(x2-dx)+' '+y2+' '+x2+' '+y2);
+    p.setAttribute('fill','none');p.setAttribute('stroke',b._c);p.setAttribute('stroke-width','2.4');
+    p.setAttribute('stroke-opacity','.75');p.setAttribute('stroke-linecap','round');svg.appendChild(p);
+  });
+}
+function fit(){
+  var w=stage.offsetWidth,h=stage.offsetHeight,vw=vp.clientWidth,vh=vp.clientHeight;
+  if(!vw||!vh)return;
+  s=Math.max(.35,Math.min(vw/w,(vh-24)/h,1.1));tx=(vw-w*s)/2;ty=Math.max(8,(vh-h*s)/2);apply();
+}
+function relayout(){links();fit()}
+function toggle(b){setC(b,b._k.style.display!=='none');requestAnimationFrame(links)}
+function zoomAt(cx,cy,ns){ns=Math.max(.3,Math.min(2.5,ns));tx=cx-(cx-tx)*ns/s;ty=cy-(cy-ty)*ns/s;s=ns;apply()}
+tree.appendChild(build(DATA,0,PAL[0],null));
+nodes.forEach(function(b){if(b._k&&b._d>=1)setC(b,true)});
+var pts=new Map(),down=null,moved=0,d0=1,s0=1;
+vp.addEventListener('pointerdown',function(e){
+  if(e.target.closest('.tb'))return;
+  vp.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){down=e.target;moved=0;vp.classList.add('drag')}
+  else if(pts.size===2){var v=Array.from(pts.values());d0=Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)||1;s0=s;down=null}
+});
+vp.addEventListener('pointermove',function(e){
+  var p=pts.get(e.pointerId);if(!p)return;
+  if(pts.size===1){var dx=e.clientX-p.x,dy=e.clientY-p.y;tx+=dx;ty+=dy;moved+=Math.abs(dx)+Math.abs(dy);p.x=e.clientX;p.y=e.clientY;apply()}
+  else if(pts.size===2){
+    p.x=e.clientX;p.y=e.clientY;var v=Array.from(pts.values()),r=vp.getBoundingClientRect();
+    zoomAt((v[0].x+v[1].x)/2-r.left,(v[0].y+v[1].y)/2-r.top,s0*Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)/d0);
+  }
+});
+function end(e){
+  if(!pts.has(e.pointerId))return;var was=pts.size;pts.delete(e.pointerId);
+  if(pts.size===0){
+    vp.classList.remove('drag');
+    if(was===1&&moved<6&&down&&down.closest){var b=down.closest('.node.has');if(b)toggle(b)}
+    down=null;
+  }
+}
+vp.addEventListener('pointerup',end);vp.addEventListener('pointercancel',end);
+vp.addEventListener('wheel',function(e){
+  if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();
+  var r=vp.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,s*(e.deltaY<0?1.12:.89));
+},{passive:false});
+tree.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;var b=e.target.closest&&e.target.closest('.node.has');
+  if(b){e.preventDefault();toggle(b)}
+});
+document.getElementById('zi').onclick=function(){zoomAt(vp.clientWidth/2,vp.clientHeight/2,s*1.2)};
+document.getElementById('zo').onclick=function(){zoomAt(vp.clientWidth/2,vp.clientHeight/2,s/1.2)};
+document.getElementById('fit').onclick=fit;
+document.getElementById('all').onclick=function(){nodes.forEach(function(b){if(b._k)setC(b,false)});requestAnimationFrame(relayout)};
+document.getElementById('less').onclick=function(){nodes.forEach(function(b){if(b._k)setC(b,b._d>=1)});requestAnimationFrame(relayout)};
+var coarse=window.matchMedia&&matchMedia('(pointer:coarse)').matches,pan=document.getElementById('pan');
+function tmode(){vp.style.touchAction=(!coarse||pan.getAttribute('aria-pressed')==='true')?'none':'pan-y'}
+if(coarse)pan.style.display='';
+pan.onclick=function(){var on=pan.getAttribute('aria-pressed')!=='true';pan.setAttribute('aria-pressed',String(on));pan.style.background=on?'#0F5C5A':'';pan.style.color=on?'#fff':'';tmode()};
+tmode();
+requestAnimationFrame(relayout);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(relayout);
+if(window.ResizeObserver)new ResizeObserver(relayout).observe(vp);
+})();
+</script></body></html>"""
 
-    walk(tree, None, pal[0], 0)
-    return "".join(out) + "}"
+MATH_HTML = r"""<!doctype html><html><head><meta charset="utf-8"></head><body>
+<script>
+(function(){
+var P,D;
+try{P=window.parent;D=P.document;void D.body}catch(e){return}
+var SETS=[
+ ["Kí hiệu",["±","×","÷","√","²","³","ⁿ","₁","₂","ₙ","≤","≥","≠","≈","∞","∑","∏","∫","∂","∈","∉","⊂","∪","∩","∅","→","⇒","⇔","∴","∀","∃","°","‰","|","Ā","x̄","p̂"]],
+ ["Hy Lạp",["α","β","γ","δ","ε","θ","λ","μ","ν","π","ρ","σ","τ","φ","χ","ψ","ω","Δ","Σ","Ω","Φ","Π","Θ","Λ","χ²"]],
+ ["Công thức",[
+  ["phân số","$\\frac{a}{b}$"],["căn","$\\sqrt{x}$"],["mũ","$x^{2}$"],["chỉ số","$x_{i}$"],["tổ hợp","$C_n^k$"],["chỉnh hợp","$A_n^k$"],
+  ["n!","n!"],["P(A|B)","P(A|B)"],["P(A∩B)","P(A∩B)"],["P(A∪B)","P(A∪B)"],["E(X)","E(X)"],["Var(X)","Var(X)"],
+  ["X~B(n;p)","X ~ B(n; p)"],["X~N(μ;σ²)","X ~ N(μ; σ²)"],["tổng","$\\sum_{i=1}^{n} x_i$"],["tích phân","$\\int_{a}^{b} f(x)\\,dx$"],
+  ["xác suất toàn phần","$P(B)=\\sum_{i} P(A_i)P(B|A_i)$"],["Bayes","$P(A|B)=\\frac{P(B|A)P(A)}{P(B)}$"],
+  ["nhị thức","$P(X=k)=C_n^k p^k (1-p)^{n-k}$"]
+ ]]
+];
+["xstk-math","xstk-math-css"].forEach(function(id){var o=D.getElementById(id);if(o)o.remove()});
+if(P.__xstkFocus)D.removeEventListener('focusin',P.__xstkFocus,true);
+P.__xstkField=null;
+P.__xstkFocus=function(ev){var t=ev.target;if(t&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&(!t.type||t.type==='text'||t.type==='search'))))P.__xstkField=t};
+D.addEventListener('focusin',P.__xstkFocus,true);
+var css=D.createElement('style');css.id='xstk-math-css';
+css.textContent="#xstk-math{position:fixed;left:14px;bottom:90px;z-index:999990;font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif}"
++"#xstk-math .fab{width:50px;height:50px;border-radius:50%;border:0;background:#0F5C5A;color:#fff;font-size:24px;font-family:Georgia,'Times New Roman',serif;cursor:pointer;box-shadow:0 4px 14px rgba(15,92,90,.38)}"
++"#xstk-math .fab:focus-visible,#xstk-math button:focus-visible{outline:2px solid #B4531F;outline-offset:2px}"
++"#xstk-math .panel{display:none;position:absolute;left:0;bottom:60px;width:min(92vw,400px);max-height:min(58vh,430px);overflow:auto;background:#FBF9F4;color:#1F2A27;border:1px solid #D9D2C3;border-radius:16px;padding:12px;box-shadow:0 12px 34px rgba(31,42,39,.22)}"
++"#xstk-math.open .panel{display:block}"
++"#xstk-math .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;font-weight:600;font-size:15px}"
++"#xstk-math .hd button{border:0;background:transparent;font-size:20px;line-height:1;cursor:pointer;color:#5E6B66;padding:4px 8px}"
++"#xstk-math .sub{font-size:12px;color:#5E6B66;margin-bottom:8px;line-height:1.4}"
++"#xstk-math .tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}"
++"#xstk-math .tab{border:1px solid #D9D2C3;background:#fff;border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit;color:#1F2A27}"
++"#xstk-math .tab.on{background:#0F5C5A;border-color:#0F5C5A;color:#fff}"
++"#xstk-math .grid{display:flex;flex-wrap:wrap;gap:6px}"
++"#xstk-math .k{min-width:42px;height:42px;padding:0 10px;border:1px solid #D9D2C3;border-radius:10px;background:#fff;color:#1F2A27;font-size:17px;cursor:pointer;font-family:inherit}"
++"#xstk-math .k.f{font-size:13px;height:auto;min-height:42px;padding:6px 12px}"
++"#xstk-math .k:hover{border-color:#0F5C5A;color:#0F5C5A}"
++"#xstk-math .msg{min-height:18px;margin-top:8px;font-size:12px;color:#0F5C5A}";
+D.head.appendChild(css);
+function el(tag,cls,txt){var e=D.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+var root=el('div');root.id='xstk-math';
+var fab=el('button','fab','Σ');fab.type='button';fab.setAttribute('aria-label','Mở bàn phím kí hiệu toán học');fab.setAttribute('aria-expanded','false');
+var panel=el('div','panel');panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Bàn phím kí hiệu toán học');
+var hd=el('div','hd');hd.appendChild(el('span',null,'Kí hiệu toán học'));
+var cl=el('button',null,'×');cl.type='button';cl.setAttribute('aria-label','Đóng');hd.appendChild(cl);
+var sub=el('div','sub','Nhấp vào ô nhập trước, rồi chọn kí hiệu để chèn tại vị trí con trỏ.');
+var tabs=el('div','tabs'),grid=el('div','grid'),msg=el('div','msg');msg.setAttribute('role','status');
+panel.appendChild(hd);panel.appendChild(sub);panel.appendChild(tabs);panel.appendChild(grid);panel.appendChild(msg);
+root.appendChild(panel);root.appendChild(fab);D.body.appendChild(root);
+var timer=0;
+function say(t){msg.textContent=t;clearTimeout(timer);timer=setTimeout(function(){msg.textContent=''},1800)}
+function insert(txt){
+  var f=P.__xstkField;
+  if(!f||!D.contains(f)){say('Hãy nhấp vào một ô nhập trước.');return}
+  f.focus();
+  var a=f.selectionStart==null?f.value.length:f.selectionStart,b=f.selectionEnd==null?a:f.selectionEnd;
+  var setter=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(f),'value').set;
+  setter.call(f,f.value.slice(0,a)+txt+f.value.slice(b));
+  var pos=a+txt.length;try{f.setSelectionRange(pos,pos)}catch(e){}
+  f.dispatchEvent(new P.Event('input',{bubbles:true}));
+  say('Đã chèn '+txt.slice(0,20));
+}
+function show(i){
+  Array.prototype.forEach.call(tabs.children,function(t,j){t.classList.toggle('on',i===j)});
+  grid.textContent='';
+  SETS[i][1].forEach(function(it){
+    var lab=Array.isArray(it)?it[0]:it,txt=Array.isArray(it)?it[1]:it;
+    var k=el('button','k'+(Array.isArray(it)?' f':''),lab);k.type='button';
+    k.onclick=function(){insert(txt)};grid.appendChild(k);
+  });
+}
+SETS.forEach(function(s,i){var t=el('button','tab',s[0]);t.type='button';t.onclick=function(){show(i)};tabs.appendChild(t)});
+show(0);
+function toggle(o){root.classList.toggle('open',o);fab.setAttribute('aria-expanded',String(o))}
+fab.onclick=function(){toggle(!root.classList.contains('open'))};
+cl.onclick=function(){toggle(false)};
+root.addEventListener('mousedown',function(e){e.preventDefault()});
+function place(){
+  var v=P.visualViewport;if(!v)return;
+  var off=Math.max(0,P.innerHeight-v.height-v.offsetTop);
+  root.style.bottom=(off>0?off+12:90)+'px';
+}
+if(P.visualViewport){P.visualViewport.addEventListener('resize',place);P.visualViewport.addEventListener('scroll',place)}
+})();
+</script></body></html>"""
+
+
+def clean_tree(n, depth=0, cnt=None):
+    """Làm sạch cây do AI trả về trước khi nhúng vào HTML: chỉ giữ chữ, tối đa 3 cấp và 80 nút."""
+    cnt = cnt if cnt is not None else [0]
+    if not isinstance(n, dict) or cnt[0] >= 80:
+        return None
+    cnt[0] += 1
+    ten = re.sub(r"[\x00-\x1f$\\]", "", str(n.get("ten", "")))[:80].strip() or "?"
+    kids = []
+    if depth < 3 and isinstance(n.get("con"), list):
+        kids = [c for c in (clean_tree(k, depth + 1, cnt) for k in n["con"]) if c]
+    return {"ten": ten, "con": kids}
+
+
+def mindmap_html(tree):
+    data = json.dumps(clean_tree(tree), ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return MINDMAP_HTML.replace("__DATA__", data)
 
 
 def outline(n, d=0):
-    if not isinstance(n, dict):
-        return ""
-    return "  " * d + f"- {n.get('ten', '')}\n" + "".join(outline(c, d + 1) for c in (n.get("con") or []) if d < 3)
+    return "  " * d + f"- {n['ten']}\n" + "".join(outline(c, d + 1) for c in n["con"])
 
 
 def map_panel(proc, topic):
@@ -1161,14 +1380,15 @@ def map_panel(proc, topic):
     if st.button("Tạo bản đồ tư duy", icon=":material/account_tree:", key=f"b_map_{proc}"):
         with st.spinner("Đang vẽ bản đồ..."):
             t = ask_json(SYS_MAP, f"Chủ đề: {topic}", max_tokens=2500)
-        if isinstance(t, dict) and t.get("ten"):
-            S[mk] = {"topic": topic, "tree": t}
+        tree = clean_tree(t)
+        if tree and tree["con"]:
+            S[mk] = {"topic": topic, "tree": tree}
         elif t is not None:
             st.error("Không tạo được bản đồ. Hãy thử lại.")
     d = S.get(mk)
     if d:
         st.markdown(f"#### Bản đồ tư duy · {d['topic']}")
-        st.graphviz_chart(to_dot(d["tree"]))
+        embed(mindmap_html(d["tree"]), 560)
         with st.expander("Dạng danh sách (dễ đọc trên điện thoại)"):
             st.markdown(outline(d["tree"]))
 
@@ -1304,7 +1524,7 @@ def proc_nav():
         with col:
             st.button(title, icon=icon, key=f"b_proc_{k}", type="primary" if k == cur else "secondary",
                       on_click=set_proc, args=(k,))
-            st.caption(desc)
+            st.markdown(f'<div class="procdesc">{desc}</div>', unsafe_allow_html=True)
 
 
 def render_proc(proc):
@@ -1325,7 +1545,7 @@ def render_proc(proc):
 
 
 def topbar():
-    a, b, c = st.columns([5, 1.7, 1.5], vertical_alignment="center")
+    a, b, c = st.columns([5, 1.8, 1.6], vertical_alignment="center")
     a.markdown('<div class="brand"><span class="brand-mark" aria-hidden="true">Σ</span>'
                '<span class="eyebrow">Xác suất thống kê · Trợ lí học tập</span></div>', unsafe_allow_html=True)
     if b.button("Hồ sơ học tập", icon=":material/person:", type="primary", key="b_prof"):
@@ -1368,6 +1588,12 @@ def login():
                     save_profile(p)
                     S.user, S.profile = p["name"], p
                     st.rerun()
+    footer()
+
+
+def footer():
+    st.markdown('<div class="foot"><b>Σ μ σ</b><br>Đây là nội dung do AI tạo ra, xin hãy đối chiếu với đề cương.</div>',
+                unsafe_allow_html=True)
 
 
 def main():
@@ -1379,14 +1605,13 @@ def main():
         return
     topbar()
     hero()
+    embed(MATH_HTML, 1)  # bàn phím kí hiệu toán học nổi, dùng cho mọi ô nhập
     if not _has_key():
         st.warning("Chưa cấu hình API key: các tính năng AI tạm thời chưa hoạt động.")
     proc_nav()
     st.divider()
     render_proc(S.get("proc", "solve"))
-    left = max(0, USER_DAILY - shared().used_of(("u", S.user.lower())))
-    st.caption(f"Lượt AI còn lại hôm nay của bạn: {left}/{USER_DAILY}. Câu hỏi trùng với người khác được dùng lại, không tốn lượt.")
-    st.markdown('<div class="foot"><b>Σ μ σ</b><br>Học đúng quy trình, hiểu đến bản chất.</div>', unsafe_allow_html=True)
+    footer()
 
 
 main()
