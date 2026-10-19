@@ -704,6 +704,8 @@ div[data-testid="stButtonGroup"]{width:100%;flex-wrap:wrap;gap:.35rem}
 div[data-testid="stLayoutWrapper"]:has([data-testid="stPopover"]),div[data-testid="stElementContainer"]:has([data-testid="stButtonGroup"]){width:100%!important}
 div[data-testid="stPopover"]>div,button[data-testid="stPopoverButton"]{width:100%!important}
 div[data-testid="stButtonGroup"] [role="radiogroup"]{width:100%!important;max-width:100%!important;display:flex;flex-wrap:wrap;gap:.35rem}
+[data-testid="stPopoverBody"] div[data-testid="stButtonGroup"] button{flex:0 0 auto!important;min-height:38px}
+[data-testid="stPopoverBody"] div[data-testid="stButtonGroup"] [role="radiogroup"]{width:auto!important}
 div[data-testid="stButtonGroup"] button{flex:1 1 0;min-width:max-content;min-height:44px;border-radius:10px;justify-content:center}
 :focus-visible{outline:2px solid var(--teal)!important;outline-offset:2px}
 .step-head{display:flex;align-items:center;gap:1rem;margin:.4rem 0 1rem}
@@ -751,12 +753,60 @@ def mark(proc, i):
     S.setdefault("done", set()).add((proc, i))
 
 
+def _words(text):
+    return {x: x for x in text.split()}
+
+
+MATH = {
+    "Cơ bản": _words("± × ÷ ≤ ≥ ≠ ≈ √ ∞ π → ∈ ∉ ² ³ ₁ ₂ ₙ"),
+    "Xác suất": _words("Ω ∅ ∩ ∪ ⊂ Ā P(A) P(A|B) C(n,k) n! E(X) D(X)") | {
+        "A ∩ B": "A ∩ B", "A ∪ B": "A ∪ B", "X ~ B(n; p)": "X ~ B(n; p)", "X ~ N(μ; σ²)": "X ~ N(μ; σ²)"},
+    "Thống kê": _words("x̄ μ σ σ² Σ α β ρ λ χ² p̂ ŷ H₀ H₁"),
+    "Công thức LaTeX": {"Phân số": r"$\frac{a}{b}$", "Căn thức": r"$\sqrt{x}$", "Tổ hợp": r"$\binom{n}{k}$",
+                        "Tổng": r"$\sum_{i=1}^{n} x_i$", "Trung bình": r"$\bar{x}$", "Xác suất điều kiện": r"$P(A \mid B)$",
+                        "Số mũ": r"$x^{2}$", "Chỉ số dưới": r"$x_{i}$"},
+}
+
+
+def _ins(wk, store, g):
+    pk = f"mt_{wk}_{g}"
+    v = S.get(pk)
+    if v:
+        S[wk] = (S.get(wk) or "") + MATH[g][v]
+        if store:
+            S[store] = S[wk]
+        S[pk] = None  # bỏ chọn để lần sau chọn lại cùng ký hiệu vẫn chèn được
+
+
+def math_bar(wk, store=None, inline=False):
+    """Nút "Ký tự toán học" dưới ô nhập: chọn ký hiệu để chèn vào cuối ô (nút Σ nổi thì chèn tại vị trí con trỏ)."""
+    holder = st if inline else st.columns([1, 2])[0]
+    with holder.popover("Ký tự toán học", icon=":material/function:"):
+        st.caption("Chọn ký hiệu để chèn vào cuối ô nhập. Công thức LaTeX nằm trong cặp dấu \\$...\\$.")
+        for g in MATH:
+            st.pills(g, list(MATH[g]), key=f"mt_{wk}_{g}", on_change=_ins, args=(wk, store, g))
+
+
+def _preview(v):
+    if "$" in (v or ""):
+        with st.expander("Xem trước công thức"):
+            st.markdown(v)
+
+
+def math_area(label, wk, store=None, **kw):
+    """Ô nhập nhiều dòng có nút ký tự toán học và xem trước công thức."""
+    v = st.text_area(label, key=wk, **kw)
+    math_bar(wk, store)
+    _preview(v)
+    return v
+
+
 def keep_text(label, key, **kw):
     """Ô nhập giữ nguyên nội dung khi chuyển bước (widget không hiển thị sẽ bị Streamlit xoá trạng thái)."""
     wk = f"w_{key}"
     if wk not in S:  # đã có trạng thái widget thì không truyền value (tránh cảnh báo của Streamlit)
         kw["value"] = S.get(key, "")
-    v = st.text_area(label, key=wk, **kw)
+    v = math_area(label, wk, store=key, **kw)
     S[key] = v
     return v
 
@@ -996,7 +1046,7 @@ def es_card(pre, i, q, topic):
     k = f"pq_{pre}{i}"
     with st.container(border=True):
         st.markdown(f"**Câu {i + 1}.** {q['de']}")
-        ans = st.text_area("Bài làm của bạn", key=f"{k}_a", height=130, max_chars=4000)
+        ans = math_area("Bài làm của bạn", f"{k}_a", height=130, max_chars=4000)
         with st.expander("Hoặc tải ảnh/PDF bài làm"):
             up = st.file_uploader("Ảnh/PDF", type=["png", "jpg", "jpeg", "pdf"], accept_multiple_files=True,
                                   key=f"{k}_f", label_visibility="collapsed")
@@ -1067,6 +1117,15 @@ def oral_sys(O):
     )
 
 
+def submit_oral(proc):
+    """Chạy trong callback: lấy câu trả lời, xoá ô nhập, để thân trang xử lý (callback được phép sửa widget)."""
+    O, wk = S.get(f"oral_{proc}"), f"oral_in_{proc}"
+    t = (S.get(wk) or "").strip()
+    if O and t and not O.get("res"):
+        O["pending"] = t
+    S[wk] = ""
+
+
 def oral_panel(proc, topic, step_idx):
     kind = "Khái niệm" if proc == "concept" else "Định lí, công thức"
     ok = f"oral_{proc}"
@@ -1076,6 +1135,7 @@ def oral_panel(proc, topic, step_idx):
         S[ok] = {"topic": topic, "kind": kind, "res": None,
                  "msgs": [{"role": "user", "content": "Hãy bắt đầu vấn đáp."},
                           {"role": "assistant", "content": oral_first(topic, kind)}]}
+        S[f"oral_in_{proc}"] = ""
     O = S.get(ok)
     if not O:
         return
@@ -1084,10 +1144,10 @@ def oral_panel(proc, topic, step_idx):
         st.chat_message(m["role"]).markdown(m["content"])
     done = bool(O.get("res"))
     answered = sum(m["role"] == "user" for m in O["msgs"]) - 1
-    p = st.chat_input("Nhập câu trả lời của bạn...", disabled=done or answered >= 5, max_chars=1200)
-    if p:
-        O["msgs"].append({"role": "user", "content": p})
-        st.chat_message("user").markdown(p)
+    pend = O.pop("pending", None)
+    if pend and not done and answered < 5:
+        O["msgs"].append({"role": "user", "content": pend})
+        st.chat_message("user").markdown(pend)
         answered += 1
         if answered < 5:  # câu trả lời thứ 5 không cần nhận xét riêng, để dành lượt AI cho phần chấm điểm
             with st.chat_message("assistant"):
@@ -1099,10 +1159,14 @@ def oral_panel(proc, topic, step_idx):
                 else:
                     O["msgs"].pop()
                     answered -= 1
+    if not done and answered < 5:
+        math_area("Câu trả lời của bạn", f"oral_in_{proc}", height=110, max_chars=1200)
+        st.button("Gửi câu trả lời", icon=":material/send:", type="primary", key=f"b_o_send_{proc}",
+                  on_click=submit_oral, args=(proc,))
     if answered >= 5 and not done:
         st.info("Bạn đã trả lời đủ 5 câu. Bấm “Kết thúc và chấm điểm” để nhận kết quả.")
     if not done and answered >= 1 and st.button("Kết thúc và chấm điểm", icon=":material/fact_check:",
-                                                  type="primary", key=f"b_o_end_{proc}"):
+                                                  key=f"b_o_end_{proc}", type="primary" if answered >= 5 else "secondary"):
         tr = "\n".join(f"{'Giám khảo' if m['role'] == 'assistant' else 'Học sinh'}: {m['content']}" for m in O["msgs"][1:])
         with st.spinner("Đang chấm phần vấn đáp..."):
             res = ask_json(SYS_ORAL_GRADE, f"Chủ đề: {O['topic']}\nDạng: {O['kind']}\nBản ghi:\n{tr}",
@@ -1403,6 +1467,8 @@ def topic_box(proc):
         sel = c1.selectbox(f"Chọn {what} cần học", opts, index=opts.index(cur) if cur in opts else 0, key=f"w_sel_{proc}")
         own = c2.text_input("Hoặc nhập chủ đề riêng", value=S.get(f"own_{proc}", ""), key=f"w_own_{proc}",
                             placeholder="Ví dụ: Phân phối chuẩn tắc", max_chars=80)
+        with c2:
+            math_bar(f"w_own_{proc}", f"own_{proc}", inline=True)
     S[f"sel_{proc}"], S[f"own_{proc}"] = sel, own
     return own.strip() or sel
 
